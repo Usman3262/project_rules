@@ -1,17 +1,15 @@
-# Template Prompt for Backend Development
 
-Always follow these backend rules when generating code:
+   1 Please load and remember these backend architecture rules from the file for all future development tasks. I want you
+     to automatically follow these patterns and conventions for any backend code you help me create:
+   2 
+   3 [Then attach or paste the content of your backend_rules.txt file here]
+   4 
+   5 Remember to follow this exact architecture for all future projects - MVC + Service + Repository pattern, file size 
+     limits, proper folder structure, and Swagger documentation requirements. These rules should be applied automatically
+     to any feature requests I make.
 
-{{include:./backend_rules.txt}}
+  Alternatively, if the backend_rules.txt file is accessible in your project, you can simply say:
 
----
-
-TASK: {{task}}
-
-Additional requirements:
-- Ensure code integrates properly with existing architecture
-- Follow the project's naming conventions
-- Include proper error handling and validation
-- Use async/await consistently for database operations
-- Write clean, maintainable code with proper comments where needed
-- Consider edge cases and security implications
+   1 Please read the file at [path_to]/backend_rules.txt and save these backend architecture rules to Qwen.md for 
+     automatic reference in all future projects. I want you to follow these exact patterns and conventions for any 
+     backend development tasks going forward.
