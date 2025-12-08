@@ -1,0 +1,17 @@
+# Template Prompt for Backend Development
+
+Always follow these backend rules when generating code:
+
+{{include:./backend_rules.txt}}
+
+---
+
+TASK: {{task}}
+
+Additional requirements:
+- Ensure code integrates properly with existing architecture
+- Follow the project's naming conventions
+- Include proper error handling and validation
+- Use async/await consistently for database operations
+- Write clean, maintainable code with proper comments where needed
+- Consider edge cases and security implications
