@@ -332,3 +332,35 @@ Clear naming
 Modular architecture
 
 Consistent formatting
+
+### Swagger Documentation Rules
+
+1. Every new route, controller, service, or endpoint added to the backend must include
+   a corresponding Swagger documentation file inside the folder: ./Docs
+
+2. Swagger docs must follow these standards:
+   - File name must match the route or module (e.g., user.routes → Docs/user.yaml).
+   - Use OpenAPI 3.0 format.
+   - Include: summary, description, parameters, requestBody, responses, and security.
+   - Responses must include success (200/201) and error schemas (400/401/404/500).
+
+3. No endpoint is considered "complete" unless:
+   - Controller is implemented
+   - Validator is included
+   - Route is created
+   - Swagger doc file exists inside ./Docs
+   - Swagger file is properly linked to the global swagger.json or swagger loader
+
+4. Folder Structure Standard:
+   ./Docs/
+       - user.yaml
+       - auth.yaml
+       - product.yaml
+       - listing.yaml
+       - etc.
+
+5. If an endpoint is updated, the Swagger documentation **must also be updated**
+   in the corresponding file inside ./Docs.
+
+6. The AI must automatically generate Swagger documentation for any code it produces,
+   and place it in the correct Docs/ file path following the above rules.
