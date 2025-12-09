@@ -22,13 +22,13 @@ No module should depend on files outside its layer.
 
 2. File Size & Function Size Rules
 
-Max 80 lines per file.
+Max 100 lines per file.
 
-Max 10 lines per function.
+Max 20 lines per function.   butt handle all expextion if line exceed dont worry work in this function or create heler as tell in under following
 
 If content exceeds the limit → split automatically into smaller files.
 
-Controllers should be 5–10 lines max.
+Controllers should be 20 lines max.
 
 3. Folder Structure Rules
 
@@ -339,7 +339,7 @@ Consistent formatting
    a corresponding Swagger documentation file inside the folder: ./Docs
 
 2. Swagger docs must follow these standards:
-   - File name must match the route or module (e.g., user.routes → Docs/user.yaml).
+   - File name must match the route or module (e.g., user.routes → Docs/user/endpoints.js).
    - Use OpenAPI 3.0 format.
    - Include: summary, description, parameters, requestBody, responses, and security.
    - Responses must include success (200/201) and error schemas (400/401/404/500).
@@ -353,14 +353,27 @@ Consistent formatting
 
 4. Folder Structure Standard:
    ./Docs/
-       - user.yaml
-       - auth.yaml
-       - product.yaml
-       - listing.yaml
+       - user/
+              getuserdata_endpoint.js
+       - auth/
+          login_endpoint.js
+           register
+       - product/
+          getproduc_endpoint.js
+          newproduct_endpoint.js
+       - listing/
+          etc..
        - etc.
 
 5. If an endpoint is updated, the Swagger documentation **must also be updated**
    in the corresponding file inside ./Docs.
 
 6. The AI must automatically generate Swagger documentation for any code it produces,
-   and place it in the correct Docs/ file path following the above rules.
+   and place it in the correct Docs/ file path following the above rules. 
+
+
+
+
+
+
+if create any script file create it at ./Script       and after work delete it 
