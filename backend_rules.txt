@@ -1,39 +1,84 @@
 # project_rules
+
 Adding file with project for clean project
 
+---
 
-1. Core Architecture Rules
+## Swagger Documentation Rules
 
-Follow MVC + Service + Repository pattern.
+1. Every new route, controller, service, or endpoint added to the backend must include
+   a corresponding Swagger documentation file inside the folder: `./Docs`
 
-Strict separation of concerns:
+2. Swagger docs must follow these standards:
 
-Routes → define endpoints only.
+   * File name must match the route or module (e.g., `user.routes` → `Docs/user/getuserdata_endpoint.js`).
+   * Use OpenAPI 3.0 format.
+   * Include: summary, description, parameters, requestBody, responses, and security.
+   * Responses must include success (200/201) and error schemas (400/401/404/500).
 
-Controllers → receive request, validate, call service.
+3. No endpoint is considered **complete** unless:
 
-Services → business logic.
+   * Controller is implemented
+   * Validator is included
+   * Route is created
+   * Swagger doc file exists inside `./Docs`
+   * Swagger file is properly linked to the global swagger loader
 
-Repositories → database operations.
+4. Folder Structure Standard:
 
-Models → schema only.
+```
+./Docs/
+  user/
+    getuserdata_endpoint.js
+  auth/
+    login_endpoint.js
+    register_endpoint.js
+  product/
+    getproduct_endpoint.js
+    newproduct_endpoint.js
+  listing/
+    ...
+```
 
-No module should depend on files outside its layer.
+5. If an endpoint is updated, the Swagger documentation **must also be updated**.
 
-2. File Size & Function Size Rules
+6. The AI must automatically generate Swagger documentation for any code it produces and place it in the correct `Docs/` path.
 
-Max 100 lines per file.
+---
 
-Max 20 lines per function.   butt handle all expextion if line exceed dont worry work in this function or create heler as tell in under following
+## 1. Core Architecture Rules
 
-If content exceeds the limit → split automatically into smaller files.
+* Follow **MVC + Service + Repository** pattern
+* Strict separation of concerns:
 
-Controllers should be 20 lines max.
+| Layer        | Responsibility                          |
+| ------------ | --------------------------------------- |
+| Routes       | Define endpoints only                   |
+| Controllers  | Receive request, validate, call service |
+| Services     | Business logic                          |
+| Repositories | Database operations                     |
+| Models       | Schema only                             |
 
-3. Folder Structure Rules
+* No module should depend on files outside its layer
 
-Your backend must always follow this structure:
+---
 
+## 2. File Size & Function Size Rules
+
+* Max **100 lines per file**
+* Max **20 lines per function**
+* Controllers must be **≤20 lines**
+
+If logic exceeds limits:
+
+* Split into helpers or smaller services
+* Do NOT compress logic into unreadable code
+
+---
+
+## 3. Folder Structure Rules
+
+```
 src/
   routes/
     user/
@@ -68,312 +113,188 @@ src/
     comparePassword.js
     generateToken.js
     sendEmail.js
+```
 
-4. Routing Rules
+---
 
-Routes must ONLY map endpoints → controllers.
+## 4. Routing Rules
 
-No logic allowed inside route files.
-
-Each domain (user, product, order, etc) must have its own route folder.
+* Routes must ONLY map endpoints → controllers
+* No logic inside route files
+* Each domain has its own route folder
 
 Example:
 
-router.post("/signup", signupController);
-router.post("/login", loginController);
+```js
+router.post('/signup', signupController);
+router.post('/login', loginController);
+```
 
-5. Controller Rules
+---
+
+## 5. Controller Rules
 
 Controllers must:
 
-Be 5–10 lines.
+* Be **5–20 lines**
+* Handle request + response only
+* Call a service
+* Use try/catch
+* Return standard JSON
 
-Handle request + response only.
+Controllers must NOT:
 
-Call a service.
+* Contain business logic
+* Contain DB queries
 
-Never contain logic.
+---
 
-Never contain database queries.
+## 6. Service Rules
 
-Always use try/catch and return JSON.
+* Contain business logic only
+* Max **20–25 lines**
+* Must NOT access `req` / `res`
+* Must NOT return HTTP responses
+* Call repositories for DB
+* Throw errors instead of handling responses
 
-Controller responsibilities
-✔ Validate input
-✔ Call service
-✔ Return response
-❌ No business logic
-❌ No DB queries
+---
 
-6. Service Rules
+## 7. Repository Rules
 
-Services:
+* Handle all DB operations
+* Interact only with models
+* No validation
+* No business logic
 
-Contain the actual business logic.
+---
 
-Max 20–25 lines (then split).
+## 8. MongoDB / Mongoose Rules
 
-Must NOT return Express response, only data/objects.
+* Models define schema only
+* No business logic in models
+* Use repositories for DB operations
 
-Cannot access req/res directly.
+---
 
-Should call repositories for DB operations.
+## 9. Validation Rules
 
-Examples of services:
+* All validation lives in `validators/`
+* Never validate in controllers or services
+* Use Joi / Yup / custom validators
 
-create user
+---
 
-login user
+## 10. Naming Rules
 
-send OTP
+* Filenames must reflect responsibility
+* Descriptive and explicit naming
 
-verify OTP
+---
 
-reset password
-
-update profile
-
-7. Repository Rules
-
-Repositories:
-
-Handle all database operations.
-
-Must interact only with Mongoose Models.
-
-Cannot validate input.
-
-Cannot perform business logic.
-
-Example responsibilities:
-
-find user by email
-
-create user
-
-update user
-
-delete user
-
-8. MongoDB / Mongoose Rules
-
-Models define schema only.
-
-No logic inside models except virtuals/hooks if necessary.
-
-No mixed schema + business code.
-
-Use repository pattern for:
-
-.find()
-
-.create()
-
-.updateOne()
-
-.deleteOne()
-
-9. Validation Rules
-
-All input validation must be in validator files.
-
-Never validate inside controllers/services.
-
-Use Joi, Yup, or custom logic.
-
-Example:
-
-signupValidator.js
-loginValidator.js
-updateProfileValidator.js
-
-10. Naming Rules
-
-File names must reflect exact responsibility:
-✔ signupController.js
-✔ signupService.js
-✔ userRepository.js
-❌ main.js
-❌ userUtils.js
-
-Names must be descriptive and meaningful.
-
-11. API Response Rules
+## 11. API Response Rules
 
 Always return:
 
+```json
 {
-  success: true/false,
-  message: "",
-  data: {...}
+  "success": true,
+  "message": "",
+  "data": {}
 }
+```
 
+---
 
-No HTML responses.
-No raw text responses.
+## 12. Security Rules
 
-12. Security Rules
+* Hash passwords
+* Never return sensitive data
+* Use Helmet, CORS, Rate Limit
+* Load secrets from `.env`
 
-Always hash passwords (bcrypt or argon2).
+---
 
-Never return passwords or tokens.
+## 13. Error Handling Rules
 
-Use:
+* Services throw errors
+* Controllers catch errors
+* Standard error response
 
-Helmet
+---
 
-CORS
+## 14. Middleware Rules
 
-Rate limit
+* Auth logic only in `middlewares/`
+* <30 lines
+* No business logic
+* Must call `next()`
 
-Validation
+---
 
-Sanitization
+## 15. Code Generation Rules for AI
 
-Environment variables must be loaded from .env.
+* Follow all rules strictly
+* Split logic automatically
+* Never mix layers
+* No long files or functions
 
-13. Error Handling Rules
+---
 
-Services must throw errors.
+## 16. Example Workflow
 
-Controllers must catch errors.
+Signup API must include:
 
-Errors must be returned in standard JSON format:
+* signupController.js
+* signupService.js
+* signupValidator.js
+* Swagger doc
 
-{
-  success: false,
-  message: error.message
-}
+---
 
-14. Middleware Rules
+## 17. Script Rules
 
-All auth logic must be in /middlewares.
+* Temporary scripts must be created in `./Script`
+* Must be deleted after task completion
 
-Middlewares should be < 15 lines.
+---
 
-No business logic inside middleware.
+## 18. Environment & Cost Control Rules (NEW)
 
-Middleware should always call next().
+* Every cost-generating service must support **dev/prod toggle**
+* Use feature flags:
 
-15. Code Generation Rules for AI
+  * `USE_REDIS`
+  * `USE_WORKERS`
+  * `ENABLE_CRON`
 
-When generating code:
+Rules:
 
-AI must follow these hard rules
+* Redis, queues, workers must be **OFF in development**
+* Production services must never run by default
+* Environment-based initialization only
+* No service should connect unless explicitly enabled
 
-Maximum 10 lines per function.
+---
 
-Maximum 80 lines per file.
+## 19. Change Stability & Partner Safety Rules (NEW)
 
-Automatically split logic across multiple:
+* Once an API contract is exposed to frontend or partners:
 
-controllers
+  * Do NOT change response structure
+  * Do NOT change data types
+  * Do NOT switch object ↔ array
 
-services
+If change is necessary when:
+i ask you to add this thing in api like add a new variable etc
 
-repositories
 
-validators
+---
 
-utils
+## 20. General Clean Code Principles
 
-Must NOT place multiple features in one file.
-
-Must follow folder structure rules strictly.
-
-Must always produce clean, modular, MVC-compliant code.
-
-AI must avoid:
-
-❌ Big controller files
-❌ Multiple endpoints in same controller
-❌ Mixing controller + service + DB in one file
-❌ Long functions
-❌ Business logic inside controllers
-❌ Multilevel nested if/else
-
-16. Example Workflow (AI Must Follow)
-
-When asked to “add signup API”, AI should automatically create:
-
-signupController.js
-signupService.js
-signupValidator.js
-userRepository.js (reuse)
-
-
-When asked to “add login API”, AI should create:
-
-loginController.js
-loginService.js
-loginValidator.js
-
-
-When asked to “add product module”, AI should create a full folder:
-
-controllers/product/
-services/product/
-repositories/product/
-validators/product/
-routes/product/
-
-17. General Clean Code Principles
-
-Single Responsibility Principle (SRP)
-
-No duplicated code
-
-Reusable helpers
-
-Small functions
-
-Clear naming
-
-Modular architecture
-
-Consistent formatting
-
-### Swagger Documentation Rules
-
-1. Every new route, controller, service, or endpoint added to the backend must include
-   a corresponding Swagger documentation file inside the folder: ./Docs
-
-2. Swagger docs must follow these standards:
-   - File name must match the route or module (e.g., user.routes → Docs/user/endpoints.js).
-   - Use OpenAPI 3.0 format.
-   - Include: summary, description, parameters, requestBody, responses, and security.
-   - Responses must include success (200/201) and error schemas (400/401/404/500).
-
-3. No endpoint is considered "complete" unless:
-   - Controller is implemented
-   - Validator is included
-   - Route is created
-   - Swagger doc file exists inside ./Docs
-   - Swagger file is properly linked to the global swagger.json or swagger loader
-
-4. Folder Structure Standard:
-   ./Docs/
-       - user/
-              getuserdata_endpoint.js
-       - auth/
-          login_endpoint.js
-           register
-       - product/
-          getproduc_endpoint.js
-          newproduct_endpoint.js
-       - listing/
-          etc..
-       - etc.
-
-5. If an endpoint is updated, the Swagger documentation **must also be updated**
-   in the corresponding file inside ./Docs.
-
-6. The AI must automatically generate Swagger documentation for any code it produces,
-   and place it in the correct Docs/ file path following the above rules. 
-
-
-
-
-
-
-if create any script file create it at ./Script       and after work delete it 
+* Single Responsibility Principle
+* No duplicate logic
+* Small reusable helpers
+* Predictable behavior
+* Consistent formatting
