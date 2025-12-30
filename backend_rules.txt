@@ -298,3 +298,46 @@ i ask you to add this thing in api like add a new variable etc
 * Small reusable helpers
 * Predictable behavior
 * Consistent formatting
+
+ 22. Configuration Management Rules (NEW)
+   * All configuration should be stored in ./src/config/ directory
+   * Create separate config files for different concerns:
+     - db.js - Database connection settings
+     - config.js - General application configuration
+     - environment.js - Environment-specific settings
+     - utils.js - Utility configurations (password hashing, JWT, etc.)
+   * Never hardcode configuration values in application logic
+   * Use environment variables for sensitive data
+   * Create environment-specific configurations (dev, prod, test)
+   * Centralize configuration imports to make them easily manageable
+   * Use configuration validation to ensure required values are present
+
+  23. Environment Variables Management Rules (NEW)
+   * All environment variables must be defined in .env file
+   * Create a .env.example file with all required variables (without values)
+   * Never commit .env file to version control
+   * Use descriptive names for environment variables
+   * Group related variables with comments in the .env file
+   * Always provide fallback values for environment variables in the code
+
+  24. Swagger Documentation Enhancement Rules (NEW)
+   * All Swagger documentation files must be referenced in the main swagger config
+   * Use swagger-jsdoc to automatically generate documentation from JSDoc comments
+   * Update swagger config file to include new documentation files when added
+   * Ensure all API endpoints have corresponding Swagger documentation
+   * Test Swagger documentation after adding new endpoints
+   * Use consistent tags across all documentation files
+
+  25. Dependency Management Rules (NEW)
+   * All dependencies should be properly listed in package.json
+   * Use semantic versioning for dependencies
+   * Separate production and development dependencies appropriately
+   * Keep dependencies updated but test thoroughly after updates
+   * Document any custom or non-standard dependencies in the README
+
+  26. Error Handling Consistency Rules (NEW)
+   * All API responses must follow the standard format: {success, message, data}
+   * Error messages should be user-friendly and not expose internal details
+   * Implement centralized error handling middleware
+   * Log errors appropriately but don't expose sensitive information in responses
+   * Use appropriate HTTP status codes (200, 201, 400, 401, 404, 500)
