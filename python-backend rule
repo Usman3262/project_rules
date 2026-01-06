@@ -1,0 +1,295 @@
+```markdown
+# project_rules
+## Python Project Rules (Adapted from Node.js Rules for a Clean, Maintainable Flask/FastAPI Project)
+
+These rules are translated and adapted for a **Python** backend project using **FastAPI** (recommended for modern APIs with built-in OpenAPI/Swagger support). If you prefer Flask, adjustments can be made, but FastAPI is assumed here for better alignment with Swagger/OpenAPI.
+
+---
+
+## Swagger/OpenAPI Documentation Rules (FastAPI Advantage)
+1. FastAPI automatically generates OpenAPI (Swagger) documentation from code (using Pydantic models, docstrings, and decorators).
+2. Every new endpoint must include:
+   - Detailed docstring in the route function.
+   - Proper use of `responses=` parameter in `@app.*` decorators for error cases.
+   - Pydantic models for request/response bodies.
+3. Additional manual OpenAPI overrides (if needed) must be placed in `./docs/openapi/overrides/` as JSON/YAML files and loaded into the main app.
+4. No endpoint is considered **complete** unless:
+   - Route is defined
+   - Pydantic validator models exist
+   - Dependencies (e.g., auth) are applied
+   - Full OpenAPI description (summary, description, parameters, responses) is visible in `/docs`
+5. If an endpoint is updated, the docstring, models, and responses **must also be updated**.
+6. The AI must automatically generate proper docstrings, Pydantic models, and response definitions for any code it produces.
+
+---
+
+## 1. Core Architecture Rules
+* Follow **MVC-inspired pattern with Services + Repositories** (FastAPI uses routers instead of traditional controllers)
+* Strict separation of concerns:
+
+| Layer          | Responsibility                                      |
+|----------------|------------------------------------------------------|
+| Routers        | Define endpoints, dependencies, and call services    |
+| Services       | Business logic                                       |
+| Repositories   | Database operations                                  |
+| Models (Pydantic + SQLAlchemy/Tortoise) | Schema/validation (Pydantic) + ORM (SQLAlchemy/etc.) |
+| Dependencies   | Reusable injectable logic (auth, DB sessions, etc.)  |
+
+* No module should import from a higher layer (e.g., services must not import routers).
+
+---
+
+## 2. File Size & Function Size Rules
+* Max **150 lines per file** (Python files tend to be slightly longer due to type hints)
+* Max **30 lines per function/def**
+* Router functions (endpoint handlers) must be **≤25 lines**
+If limits are exceeded:
+* Extract logic into services or helpers
+* Do NOT write dense, unreadable code
+
+---
+
+## 3. Folder Structure Rules
+```
+src/
+  routers/
+    user/
+      user_router.py
+    auth/
+      auth_router.py
+    product/
+      product_router.py
+  services/
+    user/
+      signup_service.py
+      login_service.py
+      ...
+    product/
+      product_service.py
+  repositories/
+    user/
+      user_repository.py
+    product/
+      product_repository.py
+  models/
+    user_model.py          # SQLAlchemy/Tortoise ORM models
+    pydantic/
+      user_schemas.py      # Pydantic request/response models
+  dependencies/
+    auth_dependency.py
+    db_dependency.py
+  utils/
+    password_utils.py
+    token_utils.py
+    email_utils.py
+  config/
+    settings.py
+    database.py
+  middlewares/               # If using custom WSGI/ASGI middleware
+```
+
+---
+
+## 4. Routing Rules (FastAPI Routers)
+* Routers must ONLY register endpoints and dependencies
+* No business logic in router files
+* Each domain has its own router file/folder
+Example:
+```python
+router = APIRouter(prefix="/users", tags=["users"])
+
+@router.post("/signup")
+async def signup(user_data: SignupRequest, service: UserService = Depends()):
+    return await service.signup(user_data)
+```
+
+---
+
+## 5. Router Endpoint Handler Rules
+Endpoint functions must:
+* Be **5–25 lines**
+* Extract data from request (via Pydantic/Depends)
+* Call a service
+* Use try/except if needed (or let FastAPI exception handlers manage)
+* Return Pydantic response models
+Endpoint functions must NOT:
+* Contain business logic
+* Contain direct DB queries
+
+---
+
+## 6. Service Rules
+* Contain business logic only
+* Max **30 lines per method**
+* Must NOT access `request` or `response` objects directly
+* Must NOT return HTTP responses (return data or raise HTTPException)
+* Call repositories for DB operations
+* Raise appropriate exceptions (e.g., HTTPException or custom)
+
+---
+
+## 7. Repository Rules
+* Handle all DB operations
+* Interact only with ORM models
+* No validation
+* No business logic
+* Return raw data or ORM objects
+
+---
+
+## 8. Database / ORM Rules (SQLAlchemy or Tortoise-ORM)
+* ORM models define schema only (in `models/`)
+* No business logic in models
+* Use repositories for all database operations
+
+---
+
+## 9. Validation Rules
+* All request validation via **Pydantic models** in `models/pydantic/`
+* Never validate manually in routers or services
+* Use Pydantic's built-in validators or custom ones
+
+---
+
+## 10. Naming Rules
+* Filenames must reflect responsibility (snake_case)
+* Descriptive and explicit naming for functions, classes, variables
+
+---
+
+## 11. API Response Rules
+Always return a consistent structure using Pydantic models:
+```json
+{
+  "success": true,
+  "message": "Optional message",
+  "data": {}  // or null
+}
+```
+Define a `BaseResponse` model and wrap all responses.
+
+---
+
+## 12. Security Rules
+* Hash passwords (use passlib or bcrypt)
+* Never return sensitive data
+* Use built-in FastAPI security utilities
+* Load secrets from environment variables (via Pydantic Settings)
+* Enable CORS, trusted hosts, etc., as needed
+
+---
+
+## 13. Error Handling Rules
+* Services raise HTTPException or custom exceptions
+* Use FastAPI exception handlers for centralized error formatting
+* Always return standard error response format
+
+---
+
+## 14. Dependency/Middleware Rules
+* Auth and reusable logic in `dependencies/`
+* <40 lines per dependency
+* No business logic (only lightweight checks)
+* Use FastAPI Depends injection
+
+---
+
+## 15. Code Generation Rules for AI
+* Strictly follow all rules
+* Automatically split logic into appropriate layers
+* Never mix concerns
+* Keep files and functions small
+
+---
+
+## 16. Example Workflow (Signup API)
+Must include:
+* `routers/auth/auth_router.py` (endpoint)
+* `services/user/signup_service.py`
+* `models/pydantic/user_schemas.py` (request/response models)
+* Full OpenAPI docstring and responses in the endpoint
+
+---
+
+## 17. Script Rules
+* Temporary/utility scripts must be created in `./scripts/`
+* Must be deleted after task completion
+
+---
+
+## 18. Environment & Cost Control Rules
+* Every cost-generating service must support **dev/prod toggle**
+* Use settings flags:
+  * `USE_REDIS: bool = False`
+  * `USE_WORKERS: bool = False`
+  * `ENABLE_CRON: bool = False`
+* Redis, queues, background tasks must be **disabled in development**
+* Initialize services only if explicitly enabled via settings
+
+---
+
+## 19. Change Stability & Partner Safety Rules
+* Once an API contract is exposed to frontend or partners:
+  * Do NOT change response structure
+  * Do NOT change data types
+  * Do NOT switch object ↔ array
+* If adding new fields: make them optional and backward-compatible
+
+---
+
+## 20. General Clean Code Principles
+* Single Responsibility Principle
+* DRY (no duplicate logic)
+* Small reusable utilities
+* Predictable behavior
+* Consistent formatting (use Black + Ruff)
+
+---
+
+## 22. Configuration Management Rules
+* All configuration in `./src/config/`
+* Separate files:
+  - `settings.py` – Pydantic BaseSettings (main config)
+  - `database.py` – DB URL and session setup
+  - `jwt.py` – JWT settings
+* Never hardcode values
+* Use environment variables via Pydantic Settings
+* Validate required settings on startup
+
+---
+
+## 23. Environment Variables Management Rules
+* Define all env vars in `.env.example` (no values)
+* Never commit `.env` to version control
+* Use descriptive names
+* Provide sensible defaults where safe
+* Group with comments in `.env.example`
+
+---
+
+## 24. OpenAPI Documentation Enhancement Rules
+* Leverage FastAPI's automatic OpenAPI generation
+* Add detailed docstrings and `responses=` for all status codes
+* Use consistent tags
+* Customize OpenAPI schema if needed via app setup
+* Test `/docs` and `/redoc` after adding endpoints
+
+---
+
+## 25. Dependency Management Rules
+* All dependencies listed in `pyproject.toml` or `requirements.txt`
+* Use pinned versions or constraints
+* Separate dev dependencies (e.g., in pyproject.toml extras)
+* Keep dependencies updated with thorough testing
+* Document important dependencies in README
+
+---
+
+## 26. Error Handling Consistency Rules
+* All responses (success and error) follow `{success, message, data}`
+* Error messages user-friendly, no internal details leaked
+* Centralized exception handlers
+* Appropriate HTTP status codes
+* Log errors server-side without exposing details
+```
+
